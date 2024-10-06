@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Alert, Image, TouchableOpacity } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, Alert, Image, TouchableOpacity, ScrollView } from 'react-native';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
@@ -20,20 +20,6 @@ const fetchUserData = async () => {
   return response.data;
 };
 
-const updateUserProfile = async (userData) => {
-  const token = await AsyncStorage.getItem('authToken');
-  if (!token) {
-    throw new Error('No token found');
-  }
-  const response = await axios.put('https://tinder-oops-f804a0e0f3fe.herokuapp.com/api/users/update', userData, {
-    headers: {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json',
-    },
-  });
-  return response.data;
-};
-
 const ProfileUpdateScreen = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -48,21 +34,10 @@ const ProfileUpdateScreen = () => {
     onSuccess: (data) => {
       setName(data.name);
       setEmail(data.email);
-      setAge(data.age ? data.age.toString() : ''); // Defensive check for age
+      setAge(data.age ? data.age.toString() : ''); // Handle null or undefined age
       setBio(data.bio);
-      setLocation(data.location);
-      setImage(data.photo);
-    },
-  });
-
-  const mutation = useMutation(updateUserProfile, {
-    onSuccess: () => {
-      queryClient.invalidateQueries('userData');
-      Alert.alert('Success', 'Profile updated successfully');
-      navigation.navigate('MainScreen');
-    },
-    onError: (error) => {
-      Alert.alert('Error', error.message);
+      setLocation(data.location ? data.location.toString() : ''); // Handle null or undefined location
+      // setImage(data.photo);
     },
   });
 
@@ -79,16 +54,48 @@ const ProfileUpdateScreen = () => {
     }
   };
 
-  const handleSubmit = () => {
-    const userData = {
+  const handleSubmit = async () => {
+    const token = await AsyncStorage.getItem('authToken');
+    if (!token) {
+      throw new Error('No token found');
+    }
+
+    const payload = {
       name,
       email,
-      age: parseInt(age, 10),
+      age: age ? parseInt(age, 10) : null, // Ensure age is a number
       bio,
       location,
-      photo: image,
+      // photo: image,
     };
-    mutation.mutate(userData);
+
+    console.log('Request Payload:', payload); // Log the request payload
+
+    try {
+      const response = await axios.put('https://tinder-oops-f804a0e0f3fe.herokuapp.com/api/users/update', payload, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+      console.log('Response:', response.data);
+      Alert.alert("Profile Updated", "Your profile has been updated.");
+      queryClient.invalidateQueries('userData');
+      navigation.navigate('ProfileScreen');
+    } catch (error) {
+      if (error.response) {
+        console.log('Error Response:', error.response.data); // Log the error response
+        Alert.alert("Error", error.response.data.error || 'There was an error updating your profile.');
+      } else {
+        console.log('Error:', error.message);
+        Alert.alert("Error", 'There was an error updating your profile.');
+      }
+    }
+  };
+
+  const handleSignOut = async () => {
+    await AsyncStorage.removeItem('authToken');
+    Alert.alert("Signed Out", "You have been signed out.");
+    navigation.navigate('SignIn');
   };
 
   if (isLoading) {
@@ -101,66 +108,62 @@ const ProfileUpdateScreen = () => {
 
   return (
     <View style={styles.container}>
-      <View style={styles.card}>
-        <View style={styles.header}>
-          <Image source={{ uri: image }} style={styles.avatar} />
-          <Text style={styles.title}>{name}</Text>
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
+        <View style={styles.card}>
+          <View style={styles.header}>
+            <Image
+              source={{ uri: image || 'https://via.placeholder.com/300x350.png?text=No+Image' }}
+              style={styles.avatar}
+            />
+            <Text style={styles.title}>{name}</Text>
+          </View>
+          <View style={styles.infoContainer}>
+            <Text style={styles.label}>Email:</Text>
+            <TextInput
+              style={styles.input}
+              value={email}
+              onChangeText={setEmail}
+            />
+          </View>
+          <View style={styles.infoContainer}>
+            <Text style={styles.label}>Age:</Text>
+            <TextInput
+              style={styles.input}
+              value={age}
+              onChangeText={setAge}
+              keyboardType="numeric"
+            />
+          </View>
+          <View style={styles.infoContainer}>
+            <Text style={styles.label}>Bio:</Text>
+            <TextInput
+              style={[styles.input, styles.bioInput]}
+              value={bio}
+              onChangeText={setBio}
+              multiline={true}
+              textAlignVertical="top"
+            />
+          </View>
+          <View style={styles.infoContainer}>
+            <Text style={styles.label}>Location:</Text>
+            <TextInput
+              style={styles.input}
+              value={location}
+              onChangeText={setLocation}
+            />
+          </View>
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity style={styles.updateButton} onPress={handleSubmit}>
+              <Text style={styles.buttonText}>Update Profile</Text>
+            </TouchableOpacity>
+          </View>
+          <View style={{ flex: 1 }} />
+          <TouchableOpacity style={styles.signOutButton} onPress={handleSignOut}>
+            <Text style={styles.signOutButtonText}>Sign Out</Text>
+          </TouchableOpacity>
         </View>
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Name:</Text>
-          <TextInput
-            style={styles.input}
-            value={name}
-            onChangeText={setName}
-          />
-        </View>
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Email:</Text>
-          <TextInput
-            style={styles.input}
-            value={email}
-            onChangeText={setEmail}
-            keyboardType="email-address"
-          />
-        </View>
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Age:</Text>
-          <TextInput
-            style={styles.input}
-            value={age}
-            onChangeText={setAge}
-            keyboardType="numeric"
-          />
-        </View>
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Bio:</Text>
-          <TextInput
-            style={styles.input}
-            value={bio}
-            onChangeText={setBio}
-            multiline
-          />
-        </View>
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Location:</Text>
-          <TextInput
-            style={styles.input}
-            value={location}
-            onChangeText={setLocation}
-          />
-        </View>
-        <Button title="Pick an image from camera roll" onPress={pickImage} />
-        {image && <Image source={{ uri: image }} style={styles.image} />}
-      </View>
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-          <Text style={styles.buttonText}>Update Profile</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('ProfileScreen')}>
-          <Text style={styles.buttonText}>Cancel</Text>
-        </TouchableOpacity>
-      </View>
-        <BannerMenu />
+      </ScrollView>
+      <BannerMenu />
     </View>
   );
 };
@@ -171,6 +174,10 @@ const styles = StyleSheet.create({
     padding: 20,
     backgroundColor: '#FFFAFA',
   },
+  scrollContainer: {
+    flexGrow: 1,
+    paddingBottom: 100, // Add padding at the bottom to ensure the button is not cut off
+  },
   card: {
     backgroundColor: '#fff',
     borderRadius: 10,
@@ -179,53 +186,68 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   header: {
-    flexDirection: 'row',
+    flexDirection: 'column',
     alignItems: 'center',
     marginBottom: 20,
   },
   avatar: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    marginRight: 20,
+    width: 360, // Adjust the width to match the CardSwiper image size
+    height: 400, // Adjust the height to match the CardSwiper image size
+    borderRadius: 10, // Make the corners slightly rounded
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
+    marginTop: 20,
   },
-  inputContainer: {
+  infoContainer: {
+    flexDirection: 'row',
     marginBottom: 10,
   },
   label: {
     fontWeight: 'bold',
-    marginBottom: 5,
+    marginRight: 10,
   },
   input: {
     borderWidth: 1,
     borderColor: '#ccc',
     padding: 10,
     borderRadius: 5,
+    flex: 1,
   },
-  image: {
-    width: 200,
-    height: 200,
-    marginVertical: 10,
+  bioInput: {
+    height: 100, // Make the bio input box taller
   },
   buttonContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
+    marginBottom: 20,
   },
-  button: {
+  updateButton: {
     backgroundColor: '#007bff',
-    padding: 10,
+    padding: 15,
     borderRadius: 5,
     alignItems: 'center',
-    flex: 1,
-    marginHorizontal: 5,
+    justifyContent: 'center',
+    width: '60%', // Increase the width of the Update Profile button
   },
   buttonText: {
     color: '#fff',
-    fontSize: 16,
+    fontSize: 18, // Increase the font size for the Update Profile button
+  },
+  signOutButton: {
+    backgroundColor: '#ff6347',
+    padding: 10, // Reduce padding to make the button smaller
+    borderRadius: 5,
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '30%', // Reduce the width of the Sign Out button
+    alignSelf: 'center', // Center the Sign Out button
+    marginBottom: 120, // Add margin to separate from the banner
+  },
+  signOutButtonText: {
+    color: '#fff',
+    fontSize: 16, // Reduce font size to make the text smaller
   },
 });
 

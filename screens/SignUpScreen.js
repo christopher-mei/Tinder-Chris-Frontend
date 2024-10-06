@@ -91,7 +91,7 @@ const SignUpScreen = () => {
       >
         {({ handleChange, handleBlur, handleSubmit, values, touched, errors }) => (
           <View style={styles.container}>
-            <Icon name="fire" size={250} color="#F4A460" style={styles.headerIcon} />
+            <Icon name="fire" size={150} color="#F4A460" style={styles.headerIcon} />
             <Text style={styles.title}>Sign Up</Text>
             <TextInput
               style={styles.input}
@@ -144,7 +144,7 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     marginBottom: 20,
     //marginBottom: 30, // Adjust as needed
-    marginTop: -220, // Adjust as needed
+    marginTop: -20, // Adjust as needed
     //alignSelf: 'center', // Center the icon
   },
   title: {

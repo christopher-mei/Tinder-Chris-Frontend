@@ -70,7 +70,7 @@ const SignInScreen = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <View style={styles.container}>
-      <Icon name="fire" size={250} color="#F4A460" style={styles.icon} />
+      <Icon name="fire" size={150} color="#F4A460" style={styles.icon} />
 
         <Text style={styles.title}>Sign In</Text>
         <Formik
@@ -132,7 +132,7 @@ const styles = StyleSheet.create({
   },
   icon: {
     marginBottom: 30, // Adjust as needed
-    marginTop: -220, // Adjust as needed
+    marginTop: -20, // Adjust as needed
     alignSelf: 'center', // Center the icon
   },
   welcomeBanner: {

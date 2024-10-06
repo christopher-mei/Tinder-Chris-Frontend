@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Alert, Image, TouchableOpacity } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, Alert, Image, TouchableOpacity, ScrollView } from 'react-native';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
@@ -55,39 +55,46 @@ const ProfileScreen = () => {
     return <Text>Error: {error.message}</Text>;
   }
 
+  const placeholderImage = 'https://via.placeholder.com/300x350.png?text=No+Image'; // Placeholder image URL
+
   return (
     <View style={styles.container}>
-      <View style={styles.card}>
-        <View style={styles.header}>
-          <Image source={{ uri: image }} style={styles.avatar} />
-          <Text style={styles.title}>{name}</Text>
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
+        <View style={styles.card}>
+          <View style={styles.header}>
+            <Image
+              source={{ uri: image || placeholderImage }}
+              style={styles.avatar}
+            />
+            <Text style={styles.title}>{name}</Text>
+          </View>
+          <View style={styles.infoContainer}>
+            <Text style={styles.label}>Email:</Text>
+            <Text style={styles.info}>{email}</Text>
+          </View>
+          <View style={styles.infoContainer}>
+            <Text style={styles.label}>Age:</Text>
+            <Text style={styles.info}>{age}</Text>
+          </View>
+          <View style={styles.infoContainer}>
+            <Text style={styles.label}>Bio:</Text>
+            <Text style={styles.info}>{bio}</Text>
+          </View>
+          <View style={styles.infoContainer}>
+            <Text style={styles.label}>Location:</Text>
+            <Text style={styles.info}>{location}</Text>
+          </View>
         </View>
-        <View style={styles.infoContainer}>
-          <Text style={styles.label}>Email:</Text>
-          <Text style={styles.info}>{email}</Text>
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity style={styles.updateButton} onPress={() => navigation.navigate('ProfileUpdate')}>
+            <Text style={styles.buttonText}>Update Profile</Text>
+          </TouchableOpacity>
         </View>
-        <View style={styles.infoContainer}>
-          <Text style={styles.label}>Age:</Text>
-          <Text style={styles.info}>{age}</Text>
-        </View>
-        <View style={styles.infoContainer}>
-          <Text style={styles.label}>Bio:</Text>
-          <Text style={styles.info}>{bio}</Text>
-        </View>
-        <View style={styles.infoContainer}>
-          <Text style={styles.label}>Location:</Text>
-          <Text style={styles.info}>{location}</Text>
-        </View>
-      </View>
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.updateButton} onPress={() => navigation.navigate('ProfileUpdate')}>
-          <Text style={styles.buttonText}>Update Profile</Text>
+        <View style={{ flex: 1 }} /> 
+        <TouchableOpacity style={styles.signOutButton} onPress={handleSignOut}>
+          <Text style={styles.signOutButtonText}>Sign Out</Text>
         </TouchableOpacity>
-      </View>
-      <View style={{ flex: 1 }} /> 
-      <TouchableOpacity style={styles.signOutButton} onPress={handleSignOut}>
-        <Text style={styles.signOutButtonText}>Sign Out</Text>
-      </TouchableOpacity>
+      </ScrollView>
       <BannerMenu />
     </View>
   );
@@ -99,6 +106,10 @@ const styles = StyleSheet.create({
     padding: 20,
     backgroundColor: '#FFFAFA',
   },
+  scrollContainer: {
+    flexGrow: 1,
+    paddingBottom: 100, // Add padding at the bottom to ensure the button is not cut off
+  },
   card: {
     backgroundColor: '#fff',
     borderRadius: 10,
@@ -107,19 +118,19 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   header: {
-    flexDirection: 'row',
+    flexDirection: 'column',
     alignItems: 'center',
     marginBottom: 20,
   },
   avatar: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    marginRight: 20,
+    width: 240, // Adjust the width to match the CardSwiper image size
+    height: 300, // Adjust the height to match the CardSwiper image size
+    borderRadius: 10, // Make the corners slightly rounded
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
+    marginTop: 20,
   },
   infoContainer: {
     flexDirection: 'row',
