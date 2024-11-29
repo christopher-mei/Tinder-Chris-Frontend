@@ -7,6 +7,7 @@ import { useMutation, QueryClient, QueryClientProvider } from 'react-query';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/FontAwesome5';
+import { LOCAL_URL } from '../config';
 
 // Initialize QueryClient
 const queryClient = new QueryClient();
@@ -30,7 +31,7 @@ const signInUser = async (values) => {
   console.log('Request body:', requestBody); // Log the request body
 
   // Send POST request with JSON-formatted data
-  const response = await axios.post('https://tinder-oops-f804a0e0f3fe.herokuapp.com/api/users/login', requestBody, {
+  const response = await axios.post(`${LOCAL_URL}/api/users/login`, requestBody, {
     headers: {
       'Content-Type': 'application/json',
     }

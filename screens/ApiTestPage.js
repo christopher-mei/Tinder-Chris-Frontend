@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, Button, StyleSheet } from 'react-native';
 import axios from 'axios';
+import { LOCAL_URL } from '../config';
 
 const ApiTestPage = () => {
   const [message, setMessage] = useState('');
@@ -8,7 +9,7 @@ const ApiTestPage = () => {
   const [buttonVisible, setButtonVisible] = useState(true);
 
   const fetchMessage = () => {
-    axios.get('https://accurate-rebirth-production.up.railway.app/')
+    axios.get(`${LOCAL_URL}/api/test`)
       .then(response => {
         setMessage(response.data.message);
         setButtonVisible(false);

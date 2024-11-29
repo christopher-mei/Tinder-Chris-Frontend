@@ -7,6 +7,7 @@ import { useMutation, QueryClient, QueryClientProvider } from 'react-query';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/FontAwesome5';
+import {  LOCAL_URL } from '../config';
 
 const queryClient = new QueryClient();
 
@@ -17,7 +18,7 @@ const SignUpSchema = Yup.object().shape({
 });
 
 const signUpUser = async (values) => {
-  const response = await axios.post('https://tinder-oops-f804a0e0f3fe.herokuapp.com/api/users/register', {
+  const response = await axios.post(`${LOCAL_URL}/api/users/register`, {
     name: values.name,
     email: values.email,
     password: values.password,
@@ -31,7 +32,7 @@ const signUpUser = async (values) => {
 };
 
 const signInUser = async (values) => {
-  const response = await axios.post('https://tinder-oops-f804a0e0f3fe.herokuapp.com/api/users/login', {
+  const response = await axios.post(`${LOCAL_URL}/api/users/login`, {
     email: values.email,
     password: values.password,
   }, {

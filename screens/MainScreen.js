@@ -6,13 +6,14 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import CardSwiper from '../components/CardSwiper';
 import BannerMenu from '../components/BannerMenu';
+import { LOCAL_URL } from '../config';
 
 const fetchUserData = async () => {
   const token = await AsyncStorage.getItem('authToken');
   if (!token) {
     throw new Error('No token found');
   }
-  const response = await axios.get('https://tinder-oops-f804a0e0f3fe.herokuapp.com/api/users/profile', {
+  const response = await axios.get(`${LOCAL_URL}/api/users/profile`, {
     headers: {
       'Authorization': `Bearer ${token}`,
     },
@@ -39,11 +40,7 @@ const MainScreen = () => {
     { id: 12, text: 'Chris, 29', image: 'https://i.imgur.com/mgPIfLE.jpg' },
   ];
 
-  const handleSignOut = async () => {
-    await AsyncStorage.removeItem('authToken');
-    Alert.alert("Signed Out", "You have been signed out.");
-    navigation.navigate('SignIn');
-  };
+  
 
   if (isLoading) {
     return <ActivityIndicator size="large" color="#0000ff" />;

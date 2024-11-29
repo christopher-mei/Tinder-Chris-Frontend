@@ -6,13 +6,14 @@ import { useNavigation } from '@react-navigation/native';
 import * as ImagePicker from 'expo-image-picker';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
 import BannerMenu from '../components/BannerMenu';
+import { LOCAL_URL } from '../config';
 
 const fetchUserData = async () => {
   const token = await AsyncStorage.getItem('authToken');
   if (!token) {
     throw new Error('No token found');
   }
-  const response = await axios.get('https://tinder-oops-f804a0e0f3fe.herokuapp.com/api/users/profile', {
+  const response = await axios.get(`${LOCAL_URL}/api/users/profile`, {
     headers: {
       'Authorization': `Bearer ${token}`,
     },
@@ -32,12 +33,12 @@ const ProfileUpdateScreen = () => {
 
   const { data, error, isLoading } = useQuery('userData', fetchUserData, {
     onSuccess: (data) => {
-      setName(data.name);
-      setEmail(data.email);
-      setAge(data.age ? data.age.toString() : ''); // Handle null or undefined age
-      setBio(data.bio);
-      setLocation(data.location ? data.location.toString() : ''); // Handle null or undefined location
-      // setImage(data.photo);
+      setName(data.name || '');
+      setEmail(data.email || '');
+      setAge(data.age ? data.age.toString() : '');  // Handle null age
+      setBio(data.bio || '');
+      setLocation(data.location || '');
+      setImage(data.image || null);
     },
   });
 
@@ -72,7 +73,7 @@ const ProfileUpdateScreen = () => {
     console.log('Request Payload:', payload); // Log the request payload
 
     try {
-      const response = await axios.put('https://tinder-oops-f804a0e0f3fe.herokuapp.com/api/users/update', payload, {
+      const response = await axios.put(`${LOCAL_URL}/api/users/update`, payload, {
         headers: {
           'Authorization': `Bearer ${token}`,
         },

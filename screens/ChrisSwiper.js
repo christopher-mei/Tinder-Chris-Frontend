@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
 import axios from 'axios';
 import CardStack, { Card } from 'react-native-card-stack-swiper';
+import { LOCAL_URL } from '../config';
 
 const ChrisSwiper = () => {
   const swiperRef = useRef(null);
@@ -10,7 +11,7 @@ const ChrisSwiper = () => {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const response = await axios.get('https://tinder-oops-f804a0e0f3fe.herokuapp.com/api/users/users');
+        const response = await axios.get(`${LOCAL_URL}/api/users/users`);
         setCards(response.data);
       } catch (error) {
         console.error('Error fetching user data:', error);

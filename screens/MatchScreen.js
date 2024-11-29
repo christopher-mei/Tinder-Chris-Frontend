@@ -5,6 +5,8 @@ import { useQuery } from 'react-query';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import BannerMenu from '../components/BannerMenu';
+import { LOCAL_URL } from '../config';
+
 
 const fetchUserData = async () => {
   const token = await AsyncStorage.getItem('authToken');
